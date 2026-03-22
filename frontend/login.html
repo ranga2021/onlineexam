@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+.login-container{width:100%;max-width:420px;padding:20px}
+.login-card{background:#fff;border-radius:16px;padding:48px 40px;box-shadow:0 4px 24px rgba(0,0,0,0.06);border:1px solid #e2e8f0}
+.brand-icon{width:56px;height:56px;background:#eff6ff;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.login-card h2{font-size:24px;font-weight:700;color:#0f172a;text-align:center;margin-bottom:6px}
+.login-card p.subtitle{font-size:14px;color:#64748b;text-align:center;margin-bottom:32px}
+.form-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
+.form-control{border:1px solid #d1d5db;border-radius:10px;padding:12px 16px;font-size:14px;transition:border-color .2s,box-shadow .2s}
+.form-control:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.1)}
+.btn-login{background:#2563eb;border:none;color:#fff;font-weight:600;padding:12px;border-radius:10px;font-size:15px;width:100%;transition:background .2s}
+.btn-login:hover{background:#1d4ed8;color:#fff}
+.error-msg{display:none;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:10px;padding:10px 16px;font-size:13px;text-align:center;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="brand-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <h2>Admin Login</h2>
+    <p class="subtitle">Sign in to manage your examination system</p>
+
+    <div class="error-msg" id="errorMsg">Invalid username or password</div>
+
+    <div class="mb-3">
+      <label class="form-label">Username</label>
+      <input id="username" class="form-control" placeholder="Enter your username" autocomplete="username">
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label">Password</label>
+      <input id="password" type="password" class="form-control" placeholder="Enter your password" autocomplete="current-password">
+    </div>
+
+    <button class="btn btn-login" onclick="login()">Sign In</button>
+  </div>
+</div>
+
+<script>
+// If already logged in as admin, redirect
+if (localStorage.getItem("role") === "admin") {
+  window.location.href = "/admin/dashboard";
+}
+
+document.getElementById("password").addEventListener("keydown", e => {
+  if (e.key === "Enter") login();
+});
+
+function login() {
+  const errorEl = document.getElementById("errorMsg");
+  errorEl.style.display = "none";
+
+  fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error();
+    return res.json();
+  })
+  .then(data => {
+    localStorage.setItem("user_id", data.user_id);
+    localStorage.setItem("role", data.role);
+
+    if (data.role === "admin") {
+      window.location.href = "/admin/dashboard";
+    } else {
+      errorEl.textContent = "Access denied. Admin accounts only.";
+      errorEl.style.display = "block";
+    }
+  })
+  .catch(() => {
+    errorEl.textContent = "Invalid username or password";
+    errorEl.style.display = "block";
+  });
+}
+</script>
+</body>
+</html>

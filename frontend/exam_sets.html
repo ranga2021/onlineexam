@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exam Sets</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{background:#f1f5f9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:#0f172a;min-height:100vh;margin:0}
+.top-bar{background:#1e293b;color:#fff;text-align:center;padding:10px 0;font-size:14px;font-weight:500}
+.top-bar a{color:#93c5fd;text-decoration:none;font-weight:600}
+.top-bar a:hover{text-decoration:underline}
+.sets-header{text-align:center;padding:48px 20px 32px}
+.sets-header h1{font-size:32px;font-weight:800;color:#0f172a;margin-bottom:8px}
+.sets-header p{color:#64748b;font-size:16px;margin:0}
+.set-card{background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:28px;transition:all .2s;height:100%}
+.set-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.08);transform:translateY(-2px)}
+.set-number{display:inline-block;background:#eff6ff;color:#2563eb;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:16px}
+.set-card h3{font-size:20px;font-weight:700;margin-bottom:16px}
+.set-info{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.set-info-item{display:flex;align-items:center;gap:8px;font-size:14px;color:#64748b}
+.set-info-item i{color:#94a3b8;font-size:16px}
+.set-info-item strong{color:#0f172a}
+.btn-start{background:#2563eb;border:none;color:#fff;font-weight:600;padding:12px;border-radius:10px;font-size:14px;width:100%;transition:background .2s}
+.btn-start:hover{background:#1d4ed8;color:#fff}
+.btn-resume{background:#16a34a;border:none;color:#fff;font-weight:600;padding:12px;border-radius:10px;font-size:14px;width:100%;transition:background .2s}
+.btn-resume:hover{background:#15803d;color:#fff}
+.paused-badge{background:#f0fdf4;color:#16a34a;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px}
+.footer-simple{text-align:center;padding:40px 0;color:#94a3b8;font-size:13px}
+.help-float{position:fixed;bottom:24px;right:24px;width:280px;background:#fff;border-radius:14px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.12);border:1px solid #e2e8f0;z-index:9999;animation:slideUp .6s ease-out}
+.help-float h6{font-size:14px;font-weight:700;color:#0f172a;margin-bottom:8px}
+.help-float p{font-size:13px;color:#64748b;margin-bottom:12px;line-height:1.5}
+.help-float-btn{display:inline-flex;align-items:center;gap:6px;background:#2563eb;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s}
+.help-float-btn:hover{background:#1d4ed8;color:#fff}
+.help-close{position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;line-height:1}
+@keyframes slideUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){.help-float{width:calc(100% - 32px);left:16px;right:16px}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  Pass Any OA Exam Now & Pay After You Pass. <a href="https://oapractice.com/contact">Contact Us</a>
+</div>
+
+<div class="sets-header">
+  <h1 id="examTitle">Available Sets</h1>
+  <p id="examSubTitle">Choose a set to begin your practice exam</p>
+</div>
+
+<div class="container">
+  <div class="row g-3 justify-content-center" id="setList">
+    <div class="col-12 text-center py-5" style="color:#94a3b8">Loading sets...</div>
+  </div>
+</div>
+
+<div class="footer-simple">
+  &copy; 2026 Online Examination System. All rights reserved.
+</div>
+
+<div class="help-float" id="helpCta">
+  <button class="help-close" onclick="document.getElementById('helpCta').style.display='none'">&times;</button>
+  <h6>Need Guaranteed Results?</h6>
+  <p>Our exam support service guarantees you'll pass on the first attempt. Pay only after you pass!</p>
+  <a href="https://oapractice.com/contact" class="help-float-btn">Get Support <span>&rarr;</span></a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let examId = null;
+const urlParams = new URLSearchParams(window.location.search);
+examId = urlParams.get("examId");
+
+const pathParts = window.location.pathname.split("/");
+let slug = null;
+if (pathParts.length >= 3 && pathParts[1] === "exam_sets") {
+  slug = pathParts[2];
+}
+
+function loadSets() {
+  if (examId) { loadSetsByExamId(examId); return; }
+  if (slug) {
+    fetch(`/api/exams/slug/${slug}`)
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(data => { examId = data.exam_id; loadSetsByExamId(examId); })
+      .catch(() => showInvalidLink());
+    return;
+  }
+  showInvalidLink();
+}
+
+function loadSetsByExamId(id) {
+  fetch(`/api/questions/sets/${id}`)
+    .then(r => r.json())
+    .then(sets => {
+      const list = document.getElementById("setList");
+      if (!sets.length) {
+        list.innerHTML = '<div class="col-12"><div class="alert alert-warning text-center">No sets available for this exam.</div></div>';
+        return;
+      }
+
+      document.getElementById("examTitle").textContent = sets[0].exam_name;
+      document.getElementById("examSubTitle").textContent = `${sets[0].category} \u2022 ${sets.length} sets available`;
+      document.title = sets[0].exam_name + " - Exam Sets";
+      list.innerHTML = "";
+
+      sets.forEach(s => {
+        const isActive = localStorage.getItem("exam_active") === "true";
+        const activeSet = localStorage.getItem("setNo");
+        const activeExam = localStorage.getItem("examId");
+        const isPaused = isActive && activeSet == s.set_no && activeExam == id;
+
+        list.innerHTML += `
+          <div class="col-md-4 col-sm-6">
+            <div class="set-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="set-number">SET ${s.set_no}</span>
+                ${isPaused ? '<span class="paused-badge">Paused</span>' : ''}
+              </div>
+              <h3>Set ${s.set_no}</h3>
+              <div class="set-info">
+                <div class="set-info-item"><i class="bi bi-list-check"></i> <span>Questions: <strong>${s.question_count}</strong></span></div>
+                <div class="set-info-item"><i class="bi bi-clock"></i> <span>Duration: <strong>${s.duration} min</strong></span></div>
+              </div>
+              <button class="btn ${isPaused ? 'btn-resume' : 'btn-start'}" onclick="startExam(${id}, ${s.duration}, ${s.set_no})">
+                ${isPaused ? 'Resume Exam' : 'Start Exam'}
+              </button>
+            </div>
+          </div>`;
+      });
+    })
+    .catch(() => showInvalidLink());
+}
+
+function showInvalidLink() {
+  document.getElementById("setList").innerHTML =
+    '<div class="col-12"><div class="alert alert-danger text-center" style="border-radius:12px">Invalid exam link. Please check the URL and try again.</div></div>';
+}
+
+function startExam(id, duration, setNo) {
+  const isActive = localStorage.getItem("exam_active") === "true";
+  const activeSet = localStorage.getItem("setNo");
+  const activeExam = localStorage.getItem("examId");
+
+  if (isActive && (activeSet != setNo || activeExam != id)) {
+    alert("Another exam session is in progress. Please finish it first.");
+    return;
+  }
+
+  if (!isActive) {
+    localStorage.setItem("examId", id);
+    localStorage.setItem("setNo", setNo);
+    localStorage.setItem("timeLeft", duration * 60);
+    localStorage.setItem("exam_active", "true");
+  }
+
+  window.location.href = "/exam";
+}
+
+loadSets();
+</script>
+</body>
+</html>

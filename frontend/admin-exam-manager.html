@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exam Manager - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{background:#f1f5f9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:#0f172a;min-height:100vh}
+.page-header{padding:32px 0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.page-header h1{font-size:28px;font-weight:700;margin:0}
+.page-header p{color:#64748b;font-size:15px;margin:0}
+.table-card{background:#fff;border-radius:14px;border:1px solid #e2e8f0;overflow:hidden}
+.table-card .table{margin:0;font-size:14px}
+.table-card .table thead th{background:#f8fafc;color:#64748b;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;border-bottom:1px solid #e2e8f0}
+.table-card .table tbody td{padding:14px 16px;vertical-align:middle;border-bottom:1px solid #f1f5f9}
+.table-card .table tbody tr:hover{background:#f8fafc}
+.badge-cat{background:#eff6ff;color:#2563eb;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600}
+.badge-diff{padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600}
+.badge-easy{background:#f0fdf4;color:#16a34a}
+.badge-medium{background:#fffbeb;color:#d97706}
+.badge-hard{background:#fef2f2;color:#dc2626}
+.btn-action{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;transition:all .15s}
+.btn-view{background:#eff6ff;color:#2563eb}.btn-view:hover{background:#dbeafe;color:#1d4ed8}
+.btn-edit{background:#fffbeb;color:#d97706}.btn-edit:hover{background:#fef3c7;color:#b45309}
+.btn-share{background:#f0fdf4;color:#16a34a}.btn-share:hover{background:#dcfce7;color:#15803d}
+.btn-delete{background:#fef2f2;color:#dc2626}.btn-delete:hover{background:#fee2e2;color:#b91c1c}
+.modal-content{border:none;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.12)}
+.modal-header{border-bottom:1px solid #f1f5f9;padding:20px 24px}
+.modal-body{padding:24px}
+.modal-title{font-size:18px;font-weight:700}
+.btn-primary-custom{background:#2563eb;border:none;color:#fff;font-weight:600;padding:10px 24px;border-radius:10px;font-size:14px}
+.btn-primary-custom:hover{background:#1d4ed8;color:#fff}
+.empty-state{text-align:center;padding:60px 20px;color:#94a3b8}
+.empty-state i{font-size:48px;margin-bottom:12px;display:block}
+.q-item{padding:16px 0;border-bottom:1px solid #f1f5f9}
+.q-item:last-child{border-bottom:none}
+.q-correct{color:#16a34a;font-weight:600;font-size:13px}
+.q-explain{color:#64748b;font-style:italic;font-size:13px;margin-top:4px}
+.set-link-row{margin-bottom:8px}
+.set-link-row label{font-size:12px;color:#64748b;font-weight:600}
+.set-link-row .form-control{font-size:13px;background:#f8fafc}
+.btn-copy{font-size:12px;font-weight:600;border-radius:0 8px 8px 0}
+</style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>Exam Manager</h1>
+      <p>View, edit, share and manage all exams</p>
+    </div>
+    <a href="/admin/schedule" class="btn btn-primary-custom">
+      <i class="bi bi-plus-lg me-1"></i> New Exam
+    </a>
+  </div>
+
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Exam Title</th>
+            <th>Category</th>
+            <th>Difficulty</th>
+            <th>Duration</th>
+            <th>Questions</th>
+            <th style="width:220px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="examTable">
+          <tr><td colspan="6" class="text-center py-5" style="color:#94a3b8">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW QUESTIONS MODAL -->
+<div class="modal fade" id="questionModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Exam Questions</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="questionList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Exam</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editExamId">
+        <div class="mb-3">
+          <label class="form-label" style="font-size:13px;font-weight:600;color:#374151">Title</label>
+          <input id="editTitle" class="form-control" style="border-radius:10px">
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151">Category</label>
+            <select id="editCategory" class="form-select" style="border-radius:10px">
+              <option>Computer Science</option>
+              <option>Business</option>
+              <option>Humanities</option>
+              <option>Science</option>
+              <option>Social Science</option>
+              <option>Math</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label" style="font-size:13px;font-weight:600;color:#374151">Difficulty</label>
+            <select id="editDifficulty" class="form-select" style="border-radius:10px">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" style="font-size:13px;font-weight:600;color:#374151">Duration (minutes)</label>
+          <input id="editDuration" type="number" class="form-control" style="border-radius:10px">
+        </div>
+        <button class="btn btn-primary-custom w-100" onclick="updateExam()">Update Exam</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Share Exam Links</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3" id="shareExamTitle" style="font-size:14px"></p>
+
+        <div class="set-link-row mb-3">
+          <label>Main Exam Link</label>
+          <div class="input-group">
+            <input type="text" id="linkMain" class="form-control" readonly>
+            <button class="btn btn-outline-primary btn-copy" onclick="copyLink('linkMain', this)">Copy</button>
+          </div>
+        </div>
+
+        <hr style="border-color:#f1f5f9">
+        <label style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px" class="mb-2 d-block">Individual Set Links</label>
+        <div id="setLinksArea"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="height:60px"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+if (localStorage.getItem("role") !== "admin") {
+  window.location.href = "/admin";
+}
+
+fetch("/Nav")
+  .then(r => r.text())
+  .then(h => {
+    document.getElementById("navbar").innerHTML = h;
+    document.getElementById("adminMenu")?.classList.remove("d-none");
+    document.getElementById("logoutBtn")?.classList.remove("d-none");
+  });
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "/admin";
+}
+
+// LOAD EXAMS
+fetch("/api/exams/manager")
+  .then(r => r.json())
+  .then(data => {
+    const table = document.getElementById("examTable");
+    if (!data.length) {
+      table.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="bi bi-journal-x"></i><p>No exams created yet</p><a href="/admin/schedule" class="btn btn-primary-custom btn-sm mt-2">Create First Exam</a></div></td></tr>`;
+      return;
+    }
+
+    table.innerHTML = data.map(e => {
+      const diffClass = e.difficulty === "easy" ? "badge-easy" : e.difficulty === "medium" ? "badge-medium" : "badge-hard";
+      return `
+        <tr>
+          <td><strong>${e.exam_name}</strong></td>
+          <td><span class="badge-cat">${e.category}</span></td>
+          <td><span class="badge-diff ${diffClass}">${e.difficulty}</span></td>
+          <td>${e.duration} min</td>
+          <td>${e.question_count}</td>
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+              <button class="btn-action btn-view" onclick="viewQuestions(${e.exam_id})">View</button>
+              <button class="btn-action btn-edit" onclick="openEdit(${e.exam_id},'${e.exam_name.replace(/'/g,"\\'")}','${e.category}','${e.difficulty}',${e.duration})">Edit</button>
+              <button class="btn-action btn-share" onclick="openShare(${e.exam_id},'${e.exam_name.replace(/'/g,"\\'")}')">Share</button>
+              <button class="btn-action btn-delete" onclick="deleteExam(${e.exam_id})">Delete</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join("");
+  });
+
+function viewQuestions(examId) {
+  fetch(`/api/questions/${examId}`)
+    .then(r => r.json())
+    .then(data => {
+      const list = document.getElementById("questionList");
+      if (!data.length) {
+        list.innerHTML = '<div class="empty-state"><p>No questions found</p></div>';
+      } else {
+        list.innerHTML = data.map((q, i) => `
+          <div class="q-item">
+            <p class="fw-bold mb-2" style="font-size:14px">${i + 1}. ${q.question}</p>
+            <p class="mb-1" style="font-size:13px;color:#475569">A. ${q.option_a}</p>
+            <p class="mb-1" style="font-size:13px;color:#475569">B. ${q.option_b}</p>
+            <p class="mb-1" style="font-size:13px;color:#475569">C. ${q.option_c}</p>
+            <p class="mb-1" style="font-size:13px;color:#475569">D. ${q.option_d}</p>
+            <p class="q-correct mt-2">Correct: ${q.correct_option}</p>
+            ${q.explanation ? `<p class="q-explain">${q.explanation}</p>` : ""}
+          </div>`).join("");
+      }
+      new bootstrap.Modal(document.getElementById("questionModal")).show();
+    });
+}
+
+function openEdit(id, title, category, difficulty, duration) {
+  document.getElementById("editExamId").value = id;
+  document.getElementById("editTitle").value = title;
+  document.getElementById("editCategory").value = category;
+  document.getElementById("editDifficulty").value = difficulty;
+  document.getElementById("editDuration").value = duration;
+  new bootstrap.Modal(document.getElementById("editModal")).show();
+}
+
+function updateExam() {
+  fetch(`/api/exams/${editExamId.value}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      exam_name: editTitle.value,
+      category: editCategory.value,
+      difficulty: editDifficulty.value,
+      duration: editDuration.value
+    })
+  }).then(() => location.reload());
+}
+
+function deleteExam(id) {
+  if (!confirm("Are you sure you want to delete this exam? This cannot be undone.")) return;
+  fetch(`/api/exams/${id}`, { method: "DELETE" }).then(() => location.reload());
+}
+
+function openShare(examId, examName) {
+  const baseDomain = window.location.origin;
+  const slug = examName.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
+  const mainLink = `${baseDomain}/exam_sets/${slug}`;
+
+  document.getElementById("shareExamTitle").textContent = examName;
+  document.getElementById("linkMain").value = mainLink;
+
+  let html = "";
+  for (let i = 1; i <= 5; i++) {
+    html += `
+      <div class="set-link-row">
+        <label>Set ${i}</label>
+        <div class="input-group">
+          <input type="text" id="linkSet${i}" class="form-control" value="${mainLink}/set-${i}" readonly>
+          <button class="btn btn-outline-primary btn-copy" onclick="copyLink('linkSet${i}', this)">Copy</button>
+        </div>
+      </div>`;
+  }
+  document.getElementById("setLinksArea").innerHTML = html;
+  new bootstrap.Modal(document.getElementById("shareModal")).show();
+}
+
+function copyLink(inputId, btn) {
+  const input = document.getElementById(inputId);
+  navigator.clipboard.writeText(input.value).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = "Copied!";
+    btn.classList.replace("btn-outline-primary", "btn-success");
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.classList.replace("btn-success", "btn-outline-primary");
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Attempts - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{background:#f1f5f9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:#0f172a;min-height:100vh}
+.page-header{padding:32px 0 24px}
+.page-header h1{font-size:28px;font-weight:700;margin-bottom:4px}
+.page-header p{color:#64748b;font-size:15px;margin:0}
+.table-card{background:#fff;border-radius:14px;border:1px solid #e2e8f0;overflow:hidden}
+.table-card .table{margin:0;font-size:14px}
+.table-card .table thead th{background:#f8fafc;color:#64748b;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;border-bottom:1px solid #e2e8f0}
+.table-card .table tbody td{padding:14px 16px;vertical-align:middle;border-bottom:1px solid #f1f5f9}
+.table-card .table tbody tr:hover{background:#f8fafc}
+.score-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;display:inline-block}
+.score-low{background:#fef2f2;color:#dc2626}
+.score-mid{background:#fffbeb;color:#d97706}
+.score-high{background:#f0fdf4;color:#16a34a}
+.empty-state{text-align:center;padding:60px 20px;color:#94a3b8}
+.empty-state i{font-size:48px;margin-bottom:12px;display:block}
+</style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+  <div class="page-header">
+    <h1>User Attempts</h1>
+    <p>View all exam submissions and scores</p>
+  </div>
+
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Exam</th>
+            <th>Score</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="attemptsTable">
+          <tr><td colspan="4" class="text-center py-5" style="color:#94a3b8">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div style="height:60px"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+if (localStorage.getItem("role") !== "admin") {
+  window.location.href = "/admin";
+}
+
+fetch("/Nav")
+  .then(r => r.text())
+  .then(h => {
+    document.getElementById("navbar").innerHTML = h;
+    document.getElementById("adminMenu")?.classList.remove("d-none");
+    document.getElementById("logoutBtn")?.classList.remove("d-none");
+  });
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "/admin";
+}
+
+fetch("/api/attempts")
+  .then(r => r.json())
+  .then(data => {
+    const table = document.getElementById("attemptsTable");
+
+    if (!data.length) {
+      table.innerHTML = `<tr><td colspan="4"><div class="empty-state"><i class="bi bi-clipboard-x"></i><p>No attempts recorded yet</p></div></td></tr>`;
+      return;
+    }
+
+    table.innerHTML = data.map(a => {
+      let cls = "score-low";
+      if (a.score >= 40) cls = "score-high";
+      else if (a.score >= 20) cls = "score-mid";
+
+      return `
+        <tr>
+          <td>${a.user_name || "Guest"}</td>
+          <td>${a.exam_name}</td>
+          <td><span class="score-badge ${cls}">${a.score}</span></td>
+          <td style="color:#64748b">${new Date(a.submitted_at).toLocaleString()}</td>
+        </tr>`;
+    }).join("");
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Contacts - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{background:#f1f5f9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:#0f172a;min-height:100vh}
+.page-header{padding:32px 0 24px}
+.page-header h1{font-size:28px;font-weight:700;margin-bottom:4px}
+.page-header p{color:#64748b;font-size:15px;margin:0}
+.table-card{background:#fff;border-radius:14px;border:1px solid #e2e8f0;overflow:hidden}
+.table-card .table{margin:0;font-size:14px}
+.table-card .table thead th{background:#f8fafc;color:#64748b;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;border-bottom:1px solid #e2e8f0}
+.table-card .table tbody td{padding:14px 16px;vertical-align:middle;border-bottom:1px solid #f1f5f9}
+.table-card .table tbody tr:hover{background:#f8fafc}
+.status-badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.status-unread{background:#fef2f2;color:#dc2626}
+.status-read{background:#f0fdf4;color:#16a34a}
+.btn-view-msg{background:#eff6ff;color:#2563eb;border:none;padding:5px 14px;border-radius:8px;font-size:12px;font-weight:600;transition:all .15s}
+.btn-view-msg:hover{background:#dbeafe;color:#1d4ed8}
+.modal-content{border:none;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.12)}
+.modal-header{border-bottom:1px solid #f1f5f9;padding:20px 24px}
+.modal-body{padding:24px}
+.modal-title{font-size:18px;font-weight:700}
+.detail-label{font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.detail-value{font-size:14px;color:#0f172a;margin-bottom:16px}
+.msg-content{background:#f8fafc;border-radius:10px;padding:16px;font-size:14px;color:#334155;line-height:1.6;border:1px solid #e2e8f0}
+.btn-mark-read{background:#2563eb;border:none;color:#fff;font-weight:600;padding:10px 24px;border-radius:10px;font-size:14px}
+.btn-mark-read:hover{background:#1d4ed8;color:#fff}
+.empty-state{text-align:center;padding:60px 20px;color:#94a3b8}
+.empty-state i{font-size:48px;margin-bottom:12px;display:block}
+</style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Contact Requests</h1>
+    <p>Manage incoming messages and inquiries</p>
+  </div>
+
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="contactTable">
+          <tr><td colspan="6" class="text-center py-5" style="color:#94a3b8">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal fade" id="viewModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Message Details</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-label">Name</div>
+        <div class="detail-value" id="mName"></div>
+
+        <div class="detail-label">Email</div>
+        <div class="detail-value" id="mEmail"></div>
+
+        <div class="detail-label">Subject</div>
+        <div class="detail-value" id="mSubject"></div>
+
+        <div class="detail-label">Message</div>
+        <div class="msg-content" id="mMessage"></div>
+
+        <div class="text-end mt-4">
+          <button class="btn btn-outline-secondary me-2" data-bs-dismiss="modal" style="border-radius:10px;font-size:14px">Close</button>
+          <button id="markReadBtn" class="btn btn-mark-read">Mark as Read</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="height:60px"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+if (localStorage.getItem("role") !== "admin") {
+  window.location.href = "/admin";
+}
+
+fetch("/Nav")
+  .then(r => r.text())
+  .then(h => {
+    document.getElementById("navbar").innerHTML = h;
+    document.getElementById("adminMenu")?.classList.remove("d-none");
+    document.getElementById("logoutBtn")?.classList.remove("d-none");
+  });
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "/admin";
+}
+
+let selectedId = null;
+
+function loadContacts() {
+  fetch("/api/contact")
+    .then(r => r.json())
+    .then(data => {
+      const table = document.getElementById("contactTable");
+
+      if (!data.length) {
+        table.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="bi bi-envelope-x"></i><p>No contact requests yet</p></div></td></tr>`;
+        return;
+      }
+
+      table.innerHTML = data.map(msg => `
+        <tr>
+          <td style="color:#94a3b8">#${msg.id}</td>
+          <td><strong>${msg.full_name}</strong></td>
+          <td style="color:#64748b">${msg.email}</td>
+          <td>${msg.subject}</td>
+          <td><span class="status-badge ${msg.status === 'read' ? 'status-read' : 'status-unread'}">${msg.status}</span></td>
+          <td><button class="btn-view-msg" onclick="viewMessage(${msg.id}, '${msg.full_name.replace(/'/g,"\\'")}', '${msg.email}', '${msg.subject.replace(/'/g,"\\'")}', \`${msg.message.replace(/`/g,"\\`")}\`)">View</button></td>
+        </tr>`).join("");
+    });
+}
+
+function viewMessage(id, name, email, subject, message) {
+  selectedId = id;
+  document.getElementById("mName").textContent = name;
+  document.getElementById("mEmail").textContent = email;
+  document.getElementById("mSubject").textContent = subject;
+  document.getElementById("mMessage").textContent = message;
+  new bootstrap.Modal(document.getElementById("viewModal")).show();
+}
+
+document.getElementById("markReadBtn").addEventListener("click", function() {
+  fetch(`/api/contact/${selectedId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: "read" })
+  })
+  .then(r => r.json())
+  .then(() => {
+    loadContacts();
+    bootstrap.Modal.getInstance(document.getElementById("viewModal")).hide();
+  });
+});
+
+loadContacts();
+</script>
+</body>
+</html>

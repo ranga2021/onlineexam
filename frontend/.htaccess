@@ -1,0 +1,98 @@
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# 1. Redirect root, /index, /index.html, /home, and /Home to the contact page
+RewriteCond %{REQUEST_URI} ^/$(|index|index\.html|home|Home)$ [NC]
+RewriteRule ^.*$ https://oapractice.com/contact [R=301,L]
+
+# 1. Redirect only the root homepage to contact page
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^$ https://oapractice.com/contact [R=301,L]
+
+# 2. Redirect index.html explicitly if accessed directly
+RewriteRule ^index\.html$ https://oapractice.com/contact [R=301,L]
+
+# Proxy audiogen app to gunicorn on port 8010
+RewriteCond %{REQUEST_URI} ^/audiogen
+RewriteRule ^audiogen/(.*)$ http://127.0.0.1:8010/$1 [P,L]
+RewriteRule ^audiogen$ http://127.0.0.1:8010/ [P,L]
+
+# Proxy /api/* to Node (requires mod_proxy enabled in Apache)
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^api/(.*)$ http://127.0.0.1:5000/api/$1 [P,L]
+
+# Allow real files and folders
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+
+
+# RewriteRule ^exam_sets/([a-zA-Z0-9\-]+)/?$ exam_sets.html?slug=$1 [L,QSA]
+RewriteRule ^exam_sets/([^/]+)/set-([0-9]+)/?$ http://127.0.0.1:5000/api/exams/slug/$1/set-$2 [P,L]
+
+RewriteRule ^exam_sets/([^/]+)/?$ exam_sets.html [L]
+
+# If request is a real file/folder, serve it normally
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+
+# =========================
+# Admin HTML pages
+# =========================
+RewriteRule ^admin/dashboard/?$ admin-dashboard.html [L]
+RewriteRule ^admin/analytics/?$ admin-dashboard.html [L]
+RewriteRule ^admin/schedule/?$ admin-schedule.html [L]
+RewriteRule ^admin/exam-manager/?$ admin-exam-manager.html [L]
+RewriteRule ^admin/attempts/?$ admin-attempts.html [L]
+
+# =========================
+# Fix assets & components under /admin
+# =========================
+RewriteRule ^admin/assets/(.*)$ assets/$1 [L,NC]
+RewriteRule ^admin/components/(.*)$ components/$1 [L,NC]
+
+# -------------------------
+# Component routes
+# -------------------------
+RewriteRule ^Nav/?$ components/navbar.html [L]
+RewriteRule ^Footer/?$ components/footer.html [L]
+RewriteRule ^support-cta/?$ components/support-cta.html [L]
+
+# Components paths (for JavaScript fetch)
+RewriteRule ^components/footer\.html$ components/footer.html [L]
+RewriteRule ^components/footer$ components/footer.html [L]
+RewriteRule ^components/nav\.html$ components/navbar.html [L]
+RewriteRule ^components/navbar\.html$ components/navbar.html [L]
+RewriteRule ^components/support-cta\.html$ components/support-cta.html [L]
+RewriteRule ^components/support-cta$ components/support-cta.html [L]
+
+# =========================
+# Background image
+# =========================
+RewriteRule ^assets/bg_online_exam$ assets/bg_online_exam.png [L]
+
+# =========================
+# Utility routes
+# =========================
+RewriteRule ^logout/?$ login.html [L]
+RewriteRule ^home/?$ index.html [L]
+RewriteRule ^Home/?$ index.html [L]
+
+# Pages without .html
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^([^/.]+)/?$ $1.html [L]
+</IfModule>
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php82” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit

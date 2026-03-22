@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Privacy Policy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body {
+  background: none;
+  padding-top: 0px;
+}
+.page-bg {
+  background: url("assets/bg_online_exam") no-repeat right center;
+  background-size: cover;
+  background-attachment: fixed;
+
+  padding-top: 10px;
+  min-height: 100vh;
+}
+
+
+.page-card {
+  max-width: 1250px;
+  margin: 20px auto 60px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+}
+/* FOOTER */
+.footer {
+  background: #f8f9fc;
+  border-top: 1px solid #e5e7eb;
+}
+.footer-link {
+  color: #555;
+  text-decoration: none;
+}
+.footer-link:hover {
+  color: #0173BA;
+  text-decoration: underline;
+}
+.footer-social {
+  color: #0173BA;
+  font-size: 18px;
+  text-decoration: none;
+}
+.footer-social:hover {
+  color: #052D72;
+}
+.no-fixed-navbar .navbar {
+  position: static !important;
+  padding-top: 0;
+
+}
+</style>
+</head>
+
+<body class="no-fixed-navbar">
+
+<div class="page-bg">
+  <div id="navbar"></div>
+<div class="page-card">
+
+<h2 class="fw-bold mb-4 text-center">Privacy Policy</h2>
+
+<p>
+At <strong>Online Examination System</strong>, protecting the privacy of our users
+is one of our highest priorities. This Privacy Policy document explains what
+information we collect, how we use it, and how we safeguard your data while
+you use our platform.
+</p>
+
+<p>
+This Privacy Policy applies only to activities conducted through this website
+and does not apply to information collected offline or through other channels.
+</p>
+
+<h5 class="fw-semibold mt-4">Consent</h5>
+<p>
+By accessing or using the Online Examination System, you consent to this
+Privacy Policy and agree to its terms.
+</p>
+
+<h5 class="fw-semibold mt-4">Information We Collect</h5>
+<p>
+We collect information only when it is necessary to provide and improve our services.
+The types of information we may collect include:
+</p>
+
+<ul>
+  <li>User role information (Admin or User)</li>
+  <li>Exam participation data such as attempts, scores, and progress</li>
+  <li>Exam content uploaded by administrators</li>
+  <li>Basic technical data such as browser type and access timestamps</li>
+</ul>
+
+<p>
+Personal details are collected only when explicitly provided by the user,
+for example during authentication or system interactions.
+</p>
+
+<h5 class="fw-semibold mt-4">How We Use Your Information</h5>
+<p>
+The information we collect is used for the following purposes:
+</p>
+
+<ul>
+  <li>To operate, manage, and maintain online examinations</li>
+  <li>To analyze exam performance and generate analytics</li>
+  <li>To improve system security and reliability</li>
+  <li>To enhance user experience and platform functionality</li>
+</ul>
+
+<h5 class="fw-semibold mt-4">Log Files</h5>
+<p>
+The Online Examination System follows standard practices of using log files.
+These logs may include IP addresses, browser types, Internet Service Providers (ISP),
+date and time stamps, and page navigation data. This information is used solely
+for system administration, analytics, and security monitoring.
+</p>
+
+<h5 class="fw-semibold mt-4">Cookies</h5>
+<p>
+Our website may use cookies to store user preferences and session information.
+Cookies help us improve user experience and ensure smooth platform operation.
+You may disable cookies through your browser settings if you prefer.
+</p>
+
+<h5 class="fw-semibold mt-4">Data Security</h5>
+<p>
+We implement appropriate security measures to protect your data against
+unauthorized access, alteration, or disclosure. Exam data and system records
+are stored securely and are accessible only to authorized users.
+</p>
+
+<h5 class="fw-semibold mt-4">Third-Party Services</h5>
+<p>
+The Online Examination System does not sell, trade, or share user data with
+third parties. Any third-party services used are strictly limited to system
+operation and infrastructure support.
+</p>
+
+<h5 class="fw-semibold mt-4">Children’s Information</h5>
+<p>
+Protecting children’s privacy is important to us. The Online Examination System
+does not knowingly collect personal information from children under the age of 13.
+If such information is discovered, we will take immediate steps to remove it.
+</p>
+
+<h5 class="fw-semibold mt-4">Changes to This Privacy Policy</h5>
+<p>
+We may update this Privacy Policy from time to time. Any changes will be posted
+on this page and will take effect immediately upon publication.
+</p>
+
+<h5 class="fw-semibold mt-4">Contact Us</h5>
+<p>
+If you have any questions, concerns, or requests regarding this Privacy Policy,
+please contact us through the support options provided on this website.
+</p>
+
+<p class="text-muted mt-4">
+Last updated: 2026
+</p>
+
+</div>
+
+<!-- SUPPORT CTA -->
+<div id="supportCTA"></div>
+<script>
+fetch("components/support-cta")
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("supportCTA").innerHTML = html;
+  });
+</script>
+
+<div id="footer"></div>
+</div>
+
+<script>
+fetch("/Nav")
+  .then(r => r.text())
+  .then(h => document.getElementById("navbar").innerHTML = h);
+
+fetch("components/footer")
+  .then(r => r.text())
+  .then(f => document.getElementById("footer").innerHTML = f);
+</script>
+
+</body>
+</html>

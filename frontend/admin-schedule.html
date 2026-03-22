@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Schedule Exam - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{background:#f1f5f9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:#0f172a;min-height:100vh}
+.page-header{padding:32px 0 24px}
+.page-header h1{font-size:28px;font-weight:700;margin-bottom:4px}
+.page-header p{color:#64748b;font-size:15px;margin:0}
+.form-card{background:#fff;border-radius:14px;padding:36px;border:1px solid #e2e8f0;max-width:640px}
+.form-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
+.form-control,.form-select{border:1px solid #d1d5db;border-radius:10px;padding:10px 14px;font-size:14px}
+.form-control:focus,.form-select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.1)}
+.form-text{font-size:12px;color:#94a3b8}
+.btn-submit{background:#2563eb;border:none;color:#fff;font-weight:600;padding:12px 32px;border-radius:10px;font-size:15px;transition:background .2s}
+.btn-submit:hover{background:#1d4ed8;color:#fff}
+.btn-submit:disabled{background:#94a3b8;cursor:not-allowed}
+.info-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:20px;margin-bottom:28px}
+.info-box h6{font-size:14px;font-weight:700;color:#0369a1;margin-bottom:10px}
+.info-box pre{background:#fff;border:1px solid #e0f2fe;border-radius:8px;padding:14px;font-size:13px;margin:10px 0;white-space:pre-wrap}
+.info-box ul{font-size:13px;color:#334155;padding-left:20px;margin:0}
+.info-box ul li{margin-bottom:4px}
+.section-label{font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin:24px 0 12px;padding-top:16px;border-top:1px solid #f1f5f9}
+.file-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:576px){.file-grid{grid-template-columns:1fr}}
+.upload-status{display:none;text-align:center;padding:20px}
+.upload-status .spinner-border{width:24px;height:24px;border-width:3px}
+</style>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Schedule New Exam</h1>
+    <p>Upload question files and configure exam settings</p>
+  </div>
+
+  <div class="form-card">
+
+    <div class="info-box">
+      <h6><i class="bi bi-info-circle-fill me-1"></i> Question File Format</h6>
+      <p class="mb-2" style="font-size:13px;color:#334155">Upload DOCX files with MCQs in this format:</p>
+<pre>1. What is SWOT analysis?
+A. Marketing strategy
+B. Financial tool
+C. Business analysis method
+D. Sales technique
+Correct Answer: C
+Option A is incorrect because...
+Option B is incorrect because...
+Option C is correct because SWOT analyzes factors.
+Option D is incorrect because...</pre>
+      <ul>
+        <li>Each question starts with a number (1., 2., 3., ...)</li>
+        <li>Options labeled <strong>A., B., C., D.</strong></li>
+        <li><strong>Correct Answer:</strong> is required</li>
+        <li>Option explanations are optional but recommended</li>
+      </ul>
+    </div>
+
+    <!-- EXAM DETAILS -->
+    <div class="mb-3">
+      <label class="form-label">Exam Title</label>
+      <input id="examName" type="text" class="form-control" placeholder="e.g. C458 Health Fitness and Wellness" required>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-6">
+        <label class="form-label">Category</label>
+        <select id="category" class="form-select" required>
+          <option value="">Select category</option>
+          <option>Computer Science</option>
+          <option>Business</option>
+          <option>Humanities</option>
+          <option>Science</option>
+          <option>Social Science</option>
+          <option>Math</option>
+        </select>
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label">Difficulty</label>
+        <select id="difficulty" class="form-select" required>
+          <option value="">Select difficulty</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-sm-6">
+        <label class="form-label">Duration (minutes)</label>
+        <input id="duration" type="number" class="form-control" min="1" max="300" placeholder="e.g. 250" required>
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label">Back Link (after exam redirect)</label>
+        <input id="backLink" type="url" class="form-control" placeholder="https://yoursite.com/page" required>
+        <div class="form-text">Students redirect here after exam</div>
+      </div>
+    </div>
+
+    <!-- FILE UPLOADS -->
+    <div class="section-label">Question Files (5 Sets)</div>
+
+    <div class="file-grid mb-3">
+      <div>
+        <label class="form-label">Set 1</label>
+        <input type="file" id="fileSet1" class="form-control" accept=".docx" required>
+      </div>
+      <div>
+        <label class="form-label">Set 2</label>
+        <input type="file" id="fileSet2" class="form-control" accept=".docx" required>
+      </div>
+      <div>
+        <label class="form-label">Set 3</label>
+        <input type="file" id="fileSet3" class="form-control" accept=".docx" required>
+      </div>
+      <div>
+        <label class="form-label">Set 4</label>
+        <input type="file" id="fileSet4" class="form-control" accept=".docx" required>
+      </div>
+      <div>
+        <label class="form-label">Set 5</label>
+        <input type="file" id="fileSet5" class="form-control" accept=".docx" required>
+      </div>
+    </div>
+
+    <button id="submitBtn" class="btn btn-submit w-100" onclick="scheduleExam()">
+      Schedule Exam
+    </button>
+
+    <div class="upload-status" id="uploadStatus">
+      <div class="spinner-border text-primary mb-2" role="status"></div>
+      <p class="mb-0" style="font-size:14px;color:#64748b">Uploading and parsing files...</p>
+    </div>
+
+  </div>
+</div>
+
+<div style="height:60px"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+if (localStorage.getItem("role") !== "admin") {
+  window.location.href = "/admin";
+}
+
+fetch("/Nav")
+  .then(r => r.text())
+  .then(h => {
+    document.getElementById("navbar").innerHTML = h;
+    document.getElementById("adminMenu")?.classList.remove("d-none");
+    document.getElementById("logoutBtn")?.classList.remove("d-none");
+  });
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "/admin";
+}
+
+async function scheduleExam() {
+  const name = examName.value;
+  const cat = category.value;
+  const diff = difficulty.value;
+  const dur = duration.value;
+  const back = backLink.value;
+  const fileInput1 = fileSet1.files[0];
+  const fileInput2 = fileSet2.files[0];
+  const fileInput3 = fileSet3.files[0];
+  const fileInput4 = fileSet4.files[0];
+  const fileInput5 = fileSet5.files[0];
+
+  if (!name || !cat || !diff || !dur || !back || !fileInput1 || !fileInput2 || !fileInput3 || !fileInput4 || !fileInput5) {
+    alert("All fields are required, including all 5 question files.");
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append("exam_name", name);
+  fd.append("category", cat);
+  fd.append("difficulty", diff);
+  fd.append("duration", dur);
+  fd.append("back_link", back);
+  fd.append("fileSet1", fileInput1);
+  fd.append("fileSet2", fileInput2);
+  fd.append("fileSet3", fileInput3);
+  fd.append("fileSet4", fileInput4);
+  fd.append("fileSet5", fileInput5);
+
+  document.getElementById("submitBtn").style.display = "none";
+  document.getElementById("uploadStatus").style.display = "block";
+
+  try {
+    const response = await fetch("/api/exams/schedule", {
+      method: "POST",
+      body: fd
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Exam scheduled successfully!");
+      window.location.href = "/admin/exam-manager";
+    } else {
+      alert("Upload Failed: " + (data.error || "Unknown error"));
+      document.getElementById("submitBtn").style.display = "block";
+      document.getElementById("uploadStatus").style.display = "none";
+    }
+  } catch (err) {
+    alert("Error: Could not connect to the server.");
+    document.getElementById("submitBtn").style.display = "block";
+    document.getElementById("uploadStatus").style.display = "none";
+  }
+}
+</script>
+</body>
+</html>

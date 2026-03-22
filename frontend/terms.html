@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>About Us</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+body {
+  background: #f4f8ff;
+}
+
+/* HERO */
+.about-hero {
+  background: linear-gradient(
+    135deg,
+    #0b3a82,
+    #0173BA
+  );
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.about-hero h1 {
+  font-weight: 800;
+}
+
+.about-hero p {
+  max-width: 700px;
+  margin: 20px auto 0;
+  opacity: 0.95;
+}
+
+/* SECTION */
+.section {
+  padding: 70px 0;
+}
+
+.section-title {
+  font-weight: 800;
+  color: #0b3a82;
+  text-align: center;
+}
+
+/* OFFER CARDS */
+.offer-card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  height: 100%;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  transition: 0.25s ease;
+}
+
+.offer-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(0,0,0,0.12);
+}
+
+.offer-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  background: rgba(1,115,186,0.1);
+  color: #0173BA;
+  margin-bottom: 20px;
+}
+
+/* FOOTER */
+.footer {
+  background: #f8f9fc;
+  border-top: 1px solid #e5e7eb;
+}
+.footer-link {
+  color: #555;
+  text-decoration: none;
+}
+.footer-link:hover {
+  color: #0173BA;
+  text-decoration: underline;
+}
+.footer-social {
+  color: #0173BA;
+  font-size: 18px;
+  text-decoration: none;
+}
+.footer-social:hover {
+  color: #052D72;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div id="navbar"></div>
+
+<!-- HERO -->
+<section class="about-hero">
+  <h1>Who We Are & What We Do</h1>
+  <p>
+    We build a smarter way to practice, prepare, and succeed in online examinations.
+    Our platform is designed to help learners gain confidence through structured quizzes,
+    real exam simulations, and intelligent analytics.
+  </p>
+</section>
+
+<!-- ABOUT CONTENT -->
+<section class="section">
+  <div class="container">
+
+    <h2 class="section-title mb-4">Our Mission</h2>
+
+    <p class="text-center text-muted mb-5" style="max-width:800px;margin:auto;">
+      Our mission is to make exam preparation simple, accessible, and effective.
+      Whether you are practicing for academic assessments or professional exams,
+      we aim to provide a reliable environment where learning meets performance.
+    </p>
+
+    <div class="row g-4">
+
+      <!-- CARD 1 -->
+      <div class="col-md-4">
+        <div class="offer-card text-center">
+          <div class="offer-icon mx-auto">
+            <i class="bi bi-journal-check"></i>
+          </div>
+          <h5 class="fw-bold">Structured Practice Exams</h5>
+          <p class="text-muted mt-2">
+            Carefully organized quizzes with categories and difficulty levels
+            to match real examination patterns.
+          </p>
+        </div>
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="col-md-4">
+        <div class="offer-card text-center">
+          <div class="offer-icon mx-auto">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <h5 class="fw-bold">Performance Insights</h5>
+          <p class="text-muted mt-2">
+            Track attempts, analyze scores, and understand strengths and
+            improvement areas through clear analytics.
+          </p>
+        </div>
+      </div>
+
+      <!-- CARD 3 -->
+      <div class="col-md-4">
+        <div class="offer-card text-center">
+          <div class="offer-icon mx-auto">
+            <i class="bi bi-shield-lock"></i>
+          </div>
+          <h5 class="fw-bold">Reliable & Secure</h5>
+          <p class="text-muted mt-2">
+            Secure exam handling, admin-controlled scheduling,
+            and protected user data at every stage.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SUPPORT CTA -->
+<div id="supportCTA"></div>
+
+<!-- FOOTER -->
+<div id="footer"></div>
+
+<!-- LOAD COMPONENTS -->
+<script>
+fetch("/Nav")
+  .then(r => r.text())
+  .then(h => document.getElementById("navbar").innerHTML = h);
+
+fetch("components/footer")
+  .then(r => r.text())
+  .then(f => document.getElementById("footer").innerHTML = f);
+
+fetch("components/support-cta")
+  .then(r => r.text())
+  .then(c => document.getElementById("supportCTA").innerHTML = c);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

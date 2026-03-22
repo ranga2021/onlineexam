@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exam</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{background:#f1f5f9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:#0f172a;min-height:100vh;margin:0}
+.top-bar{background:#1e293b;color:#fff;text-align:center;padding:10px 0;font-size:14px;font-weight:500;position:sticky;top:0;z-index:10000}
+.top-bar a{color:#93c5fd;text-decoration:none;font-weight:600}
+.exam-container{max-width:800px;margin:0 auto;padding:20px}
+.exam-header{text-align:center;padding:32px 0 24px}
+.exam-header h1{font-size:28px;font-weight:800;color:#0f172a;margin-bottom:6px}
+.exam-header p{color:#64748b;font-size:15px;margin:0}
+.question-box{background:#fff;margin-bottom:16px;padding:32px;border-radius:14px;border:1px solid #e2e8f0;transition:box-shadow .2s}
+.question-box:hover{box-shadow:0 4px 16px rgba(0,0,0,0.04)}
+.question-box h6{font-size:16px;font-weight:700;color:#0f172a;margin-bottom:20px;line-height:1.5}
+.form-check{padding:10px 12px 10px 40px;margin-bottom:8px;border-radius:10px;border:1px solid #f1f5f9;transition:all .15s;cursor:pointer}
+.form-check:hover{background:#f8fafc;border-color:#e2e8f0}
+.form-check-input{width:18px;height:18px;margin-top:3px;cursor:pointer}
+.form-check-input:checked{background-color:#2563eb;border-color:#2563eb}
+.form-check-label{font-size:14px;color:#374151;cursor:pointer;width:100%}
+.sticky-timer{position:fixed;top:52px;right:20px;z-index:9999;background:#fff;color:#dc2626;padding:10px 20px;border-radius:12px;font-weight:700;font-size:16px;box-shadow:0 4px 16px rgba(0,0,0,0.1);border:1px solid #fecaca}
+.btn-submit{background:#2563eb;border:none;color:#fff;font-weight:700;padding:14px 48px;border-radius:12px;font-size:16px;transition:background .2s}
+.btn-submit:hover{background:#1d4ed8;color:#fff}
+/* Question Nav */
+.question-nav{position:fixed;left:20px;top:200px;width:180px;background:#fff;border-radius:14px;padding:16px 12px;box-shadow:0 4px 16px rgba(0,0,0,0.06);border:1px solid #e2e8f0;z-index:9998;max-height:60vh;overflow-y:auto}
+.nav-header{font-size:12px;font-weight:700;text-align:center;margin-bottom:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.nav-list{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.nav-item{width:28px;height:28px;font-size:12px;border-radius:6px;background:#f1f5f9;color:#64748b;text-align:center;line-height:28px;cursor:pointer;transition:.15s;font-weight:600}
+.nav-item.answered{background:#2563eb;color:#fff}
+.nav-item:hover{transform:scale(1.1)}
+@media(max-width:992px){.question-nav{display:none}}
+/* Next button */
+.next-preview{text-align:center;font-size:16px;font-weight:600;color:#cbd5e1;margin-top:24px}
+.next-btn{display:inline-flex;align-items:center;gap:8px;font-size:16px;font-weight:700;cursor:pointer;background:#fff;border:1px solid #e2e8f0;color:#0f172a;padding:10px 24px;border-radius:12px;transition:.2s}
+.next-btn:hover{background:#f8fafc;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+/* Modal */
+.modal-content{border:none;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+.info-title{font-size:22px;font-weight:800;color:#0f172a;margin-bottom:20px}
+.info-item{font-size:16px;color:#374151;margin-bottom:8px}
+.info-item strong{color:#0f172a}
+.btn-start-exam{background:#2563eb;border:none;color:#fff;padding:12px 40px;border-radius:12px;font-weight:700;font-size:16px;margin-top:16px;transition:background .2s}
+.btn-start-exam:hover{background:#1d4ed8;color:#fff}
+.disclaimer{background:#f8fafc;border-radius:10px;padding:16px;margin-top:20px;border:1px solid #e2e8f0}
+.disclaimer h6{font-size:13px;font-weight:700;color:#64748b;margin-bottom:6px}
+.disclaimer p{font-size:12px;color:#94a3b8;margin:0;line-height:1.5}
+.copyright-footer{text-align:center;padding:30px 0;color:#94a3b8;font-size:13px}
+/* Help CTA */
+.help-float{position:fixed;bottom:24px;right:24px;width:270px;background:#fff;border-radius:14px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.12);border:1px solid #e2e8f0;z-index:9999;display:none;animation:slideUp .6s ease-out}
+.help-float h6{font-size:14px;font-weight:700;color:#0f172a;margin-bottom:8px}
+.help-float p{font-size:13px;color:#64748b;margin-bottom:12px;line-height:1.5}
+.help-float-btn{display:inline-flex;align-items:center;gap:6px;background:#2563eb;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s}
+.help-float-btn:hover{background:#1d4ed8;color:#fff}
+.help-close{position:absolute;top:8px;right:12px;background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;line-height:1;display:none}
+@keyframes slideUp{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){.help-float{width:calc(100% - 32px);left:16px;right:16px;bottom:12px}.help-close{display:block}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  Pass Any OA Exam Now & Pay After You Pass. <a href="https://oapractice.com/contact">Contact Us</a>
+</div>
+
+<div id="timer" class="sticky-timer">00:00</div>
+
+<div id="questionNav" class="question-nav d-none">
+  <div class="nav-header">Answered: <span id="answeredCount">0</span> / <span id="totalCount">0</span></div>
+  <div id="navList" class="nav-list"></div>
+</div>
+
+<div class="exam-container">
+  <div class="exam-header">
+    <h1 id="examTitle">Exam</h1>
+    <p>Test your knowledge with these practice questions. Each question includes detailed explanations.</p>
+  </div>
+
+  <form id="quizForm" style="display:none;"></form>
+
+  <div class="text-center mt-4 mb-5">
+    <button id="submitBtn" class="btn btn-submit" onclick="submitQuiz()">Submit Exam</button>
+  </div>
+</div>
+
+<!-- START MODAL -->
+<div class="modal fade" id="startExamModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-5 text-center">
+        <h4 class="info-title">Exam Information</h4>
+        <div class="info-item">Total Questions: <strong><span id="infoTotalQ">--</span></strong></div>
+        <div class="info-item">Total Time: <strong><span id="infoTotalTime">--</span></strong></div>
+        <div class="info-item">Time Per Question: <strong><span id="infoTimePerQ">--</span></strong></div>
+        <div class="disclaimer">
+          <h6>Disclaimer</h6>
+          <p>OA Practice is an independent provider of free resources and exam prep. We are not affiliated with any university. All materials are created solely for student success.</p>
+        </div>
+        <button class="btn btn-start-exam" onclick="startExam()">Start Free Exam</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALL REQUIRED MODAL -->
+<div class="modal fade" id="allRequiredModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px"><div class="modal-body text-center p-4" style="font-size:15px">Please answer all questions before submitting.</div><div class="modal-footer border-0 justify-content-center"><button class="btn btn-submit btn-sm" data-bs-dismiss="modal">OK</button></div></div>
+  </div>
+</div>
+
+<!-- SUBMIT CONFIRM MODAL -->
+<div class="modal fade" id="submitConfirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px"><div class="modal-body text-center p-4" style="font-size:15px">Are you sure you want to submit?</div><div class="modal-footer border-0 justify-content-center"><button class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius:10px">Cancel</button><button class="btn btn-submit btn-sm" onclick="confirmFinalSubmission()">Yes, Submit</button></div></div>
+  </div>
+</div>
+
+<!-- LEAVE CONFIRM MODAL -->
+<div class="modal fade" id="leaveConfirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px">
+      <div class="modal-body p-4 text-center">
+        <h5 class="fw-bold mb-3" style="font-size:18px">Your exam is in progress!</h5>
+        <p style="color:#64748b;font-size:14px">Your progress will be saved. Do you want to leave?</p>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+          <button class="btn btn-outline-secondary px-4" style="border-radius:10px" data-bs-dismiss="modal">Stay</button>
+          <button class="btn btn-submit px-4" onclick="confirmLeave()">Leave</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="copyright-footer">&copy; 2026 Online Examination System. All rights reserved.</footer>
+
+<div class="help-float" id="helpCta">
+  <button class="help-close" onclick="this.parentElement.style.display='none'">&times;</button>
+  <h6>Need Guaranteed Results?</h6>
+  <p>Our exam support service guarantees you'll pass on the first attempt. Pay only after you pass!</p>
+  <a href="https://oapractice.com/contact" class="help-float-btn">Get Support <span>&rarr;</span></a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let totalQuestions = 0;
+let durationMinutes = 0;
+let timeLeft = 0;
+let timerInterval;
+let examStarted = false;
+let currentPage = 0;
+const questionsPerPage = 5;
+let allQuestionsData = [];
+
+window.onload = () => {
+  const params = new URLSearchParams(window.location.search);
+  const examId = params.get("examId") || localStorage.getItem("examId");
+  const setNo = params.get("setNo") || localStorage.getItem("setNo");
+
+  if (examId) localStorage.setItem("examId", examId);
+  if (setNo) localStorage.setItem("setNo", setNo);
+
+  if (!examId) { alert("Invalid Exam Link"); return; }
+
+  fetch("/api/exams")
+    .then(r => r.json())
+    .then(exams => {
+      const exam = exams.find(e => e.exam_id == examId);
+      if (exam) {
+        if (exam.back_link) localStorage.setItem("backLink", exam.back_link);
+        fetch(`/api/questions/${examId}?setNo=${setNo}`)
+          .then(r => r.json())
+          .then(questions => {
+            totalQuestions = questions.length;
+            const totalSecs = exam.duration * 60;
+            const perQ = totalQuestions > 0 ? Math.floor(totalSecs / totalQuestions) : 0;
+
+            document.getElementById("infoTotalQ").textContent = totalQuestions;
+            document.getElementById("infoTotalTime").textContent = `${exam.duration} mins`;
+            document.getElementById("infoTimePerQ").textContent = `${Math.floor(perQ / 60)} min ${perQ % 60} sec`;
+
+            new bootstrap.Modal(document.getElementById("startExamModal")).show();
+          });
+      }
+    });
+};
+
+function startExam() {
+  examStarted = true;
+  document.getElementById("helpCta").style.display = "block";
+  document.getElementById("quizForm").style.display = "block";
+
+  const modalEl = document.getElementById("startExamModal");
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+  if (modalInstance) modalInstance.hide();
+
+  const examId = localStorage.getItem("examId");
+
+  fetch("/api/exams")
+    .then(r => r.json())
+    .then(exams => {
+      const exam = exams.find(e => e.exam_id == examId);
+      if (exam) {
+        localStorage.setItem("currentExamName", exam.exam_name || exam.name);
+        localStorage.setItem("totalDuration", exam.duration);
+        let savedTime = localStorage.getItem("timeLeft");
+        timeLeft = (savedTime && parseInt(savedTime) > 0) ? parseInt(savedTime) : (exam.duration * 60);
+        document.getElementById("examTitle").textContent = exam.exam_name || exam.name || "Exam";
+        document.title = exam.exam_name || exam.name || "Exam";
+      }
+      loadQuestions();
+      startTimer();
+    });
+
+  if (!localStorage.getItem("examStartTime")) {
+    localStorage.setItem("examStartTime", Date.now());
+  }
+}
+
+function startTimer() {
+  const timerEl = document.getElementById("timer");
+  if (timerInterval) clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timeLeft = 0;
+      timerEl.textContent = "0:00";
+      autoSubmit();
+      return;
+    }
+    let min = Math.floor(timeLeft / 60);
+    let sec = timeLeft % 60;
+    timerEl.textContent = `${min}:${sec.toString().padStart(2, "0")}`;
+    localStorage.setItem("timeLeft", timeLeft);
+    timeLeft--;
+  }, 1000);
+}
+
+function loadQuestions() {
+  const examId = localStorage.getItem("examId");
+  const setNo = localStorage.getItem("setNo");
+  const savedAnswers = JSON.parse(localStorage.getItem("savedAnswers") || "{}");
+
+  fetch(`/api/questions/${examId}?setNo=${setNo}`)
+    .then(r => r.json())
+    .then(data => {
+      allQuestionsData = data;
+      const form = document.getElementById("quizForm");
+      form.innerHTML = "";
+      totalQuestions = data.length;
+      document.getElementById("totalCount").textContent = totalQuestions;
+      document.getElementById("questionNav").classList.remove("d-none");
+
+      const navList = document.getElementById("navList");
+      navList.innerHTML = "";
+      data.forEach((q, i) => {
+        navList.innerHTML += `<div class="nav-item" id="nav_${q.question_id}" onclick="scrollToQuestion(${i})">${i + 1}</div>`;
+      });
+
+      currentPage = 0;
+      renderPaginatedQuestions(savedAnswers);
+      setTimeout(updateNavStatus, 100);
+    });
+}
+
+function renderPaginatedQuestions(savedAnswers) {
+  const form = document.getElementById("quizForm");
+  const start = currentPage * questionsPerPage;
+  const end = start + questionsPerPage;
+  const pageQuestions = allQuestionsData.slice(start, end);
+  let html = "";
+
+  pageQuestions.forEach((q, index) => {
+    const qName = `q${q.question_id}`;
+    if (document.getElementById(`question_${q.question_id}`)) return;
+
+    html += `
+      <div class="question-box" id="question_${q.question_id}">
+        <h6>Question ${start + index + 1}: ${q.question}</h6>
+        ${["A","B","C","D"].map(opt => {
+          const checked = savedAnswers[qName] === opt ? "checked" : "";
+          return `
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="${qName}" id="${qName}_${opt}" value="${opt}" ${checked} onchange="handleAnswerChange()">
+              <label class="form-check-label" for="${qName}_${opt}">${q["option_" + opt.toLowerCase()]}</label>
+            </div>`;
+        }).join("")}
+      </div>`;
+  });
+
+  form.insertAdjacentHTML("beforeend", html);
+  renderNextButton(end < totalQuestions);
+}
+
+function renderNextButton(hasNext) {
+  const old = document.getElementById("nextPageBtn");
+  if (old) old.remove();
+  const oldP = document.getElementById("nextPreviewText");
+  if (oldP) oldP.remove();
+  if (!hasNext) return;
+
+  const form = document.getElementById("quizForm");
+  const nextNum = (currentPage + 1) * questionsPerPage + 1;
+  form.innerHTML += `
+    <div id="nextPreviewText" class="next-preview">Question ${nextNum}</div>
+    <div class="text-center mt-2 mb-3" id="nextPageBtn">
+      <button type="button" class="next-btn" onclick="nextPage()">Next <span style="font-size:18px">&darr;</span></button>
+    </div>`;
+}
+
+function nextPage() {
+  saveCurrentProgress();
+  updateNavStatus();
+  const totalPages = Math.ceil(totalQuestions / questionsPerPage);
+  if (currentPage + 1 < totalPages) {
+    currentPage++;
+    renderPaginatedQuestions(JSON.parse(localStorage.getItem("savedAnswers") || "{}"));
+  } else {
+    submitQuiz();
+  }
+}
+
+function handleAnswerChange() { saveCurrentProgress(); updateNavStatus(); }
+
+function updateNavStatus() {
+  const checked = document.querySelectorAll("input[type=radio]:checked");
+  const map = {};
+  checked.forEach(input => { map[input.name] = true; });
+  let count = 0;
+  Object.keys(map).forEach(name => {
+    const qid = name.substring(1);
+    const nav = document.getElementById(`nav_${qid}`);
+    if (nav) { nav.classList.add("answered"); count++; }
+  });
+  document.getElementById("answeredCount").textContent = count;
+}
+
+function scrollToQuestion(index) {
+  const q = allQuestionsData[index];
+  if (q) {
+    const el = document.getElementById(`question_${q.question_id}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+function confirmLeave() {
+  window.location.href = "https://oapractice.com/contact";
+}
+
+window.addEventListener("beforeunload", saveCurrentProgress);
+
+function submitQuiz() {
+  if (!examStarted) return;
+  const answered = document.querySelectorAll("input[type=radio]:checked").length;
+  if (answered !== totalQuestions) {
+    new bootstrap.Modal(document.getElementById("allRequiredModal")).show();
+    return;
+  }
+  new bootstrap.Modal(document.getElementById("submitConfirmModal")).show();
+}
+
+function confirmFinalSubmission() {
+  const modal = bootstrap.Modal.getInstance(document.getElementById("submitConfirmModal"));
+  if (modal) modal.hide();
+  clearInterval(timerInterval);
+  sendAnswers(false);
+}
+
+function autoSubmit() { sendAnswers(true); }
+
+function sendAnswers(isTimeout) {
+  const examId = localStorage.getItem("examId");
+  const setNo = localStorage.getItem("setNo");
+  const answers = [];
+  document.querySelectorAll("input[type=radio]:checked").forEach(input => {
+    answers.push({ question_id: input.name.substring(1), selected: input.value });
+  });
+
+  const totalSec = parseInt(localStorage.getItem("totalDuration")) * 60;
+  const spent = totalSec - timeLeft;
+  localStorage.setItem("timeSpent", spent);
+
+  fetch("/api/attempts/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ exam_id: examId, set_no: setNo, answers })
+  })
+  .then(r => r.json())
+  .then(result => {
+    localStorage.setItem("attemptId", result.attempt_id);
+    localStorage.setItem("timeout", isTimeout);
+    localStorage.removeItem("exam_active");
+    localStorage.removeItem("timeLeft");
+    localStorage.removeItem("examStartTime");
+    localStorage.removeItem("savedAnswers");
+    window.location.href = "/result";
+  });
+}
+
+// Back button trap
+(function() {
+  for (let i = 0; i < 10; i++) history.pushState(null, null, location.href);
+  window.addEventListener("popstate", function() {
+    if (examStarted) {
+      new bootstrap.Modal(document.getElementById("leaveConfirmModal")).show();
+      history.pushState(null, null, location.href);
+      window.addEventListener("popstate", function() {
+        window.location.replace("https://oapractice.com/contact");
+      }, { once: true });
+    }
+  });
+  window.addEventListener("keydown", function(e) {
+    if ((e.altKey && e.key === "ArrowLeft") || (e.metaKey && e.key === "[")) {
+      e.preventDefault();
+      if (examStarted) new bootstrap.Modal(document.getElementById("leaveConfirmModal")).show();
+    }
+  });
+})();
+
+function saveCurrentProgress() {
+  if (!examStarted) return;
+  localStorage.setItem("timeLeft", timeLeft);
+  const answers = {};
+  document.querySelectorAll("input[type=radio]:checked").forEach(input => {
+    answers[input.name] = input.value;
+  });
+  localStorage.setItem("savedAnswers", JSON.stringify(answers));
+}
+</script>
+</body>
+</html>
