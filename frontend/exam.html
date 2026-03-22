@@ -205,8 +205,11 @@ function startExam() {
       if (exam) {
         localStorage.setItem("currentExamName", exam.exam_name || exam.name);
         localStorage.setItem("totalDuration", exam.duration);
-        let savedTime = localStorage.getItem("timeLeft");
+        const setNo = localStorage.getItem("setNo");
+        const timerKey = `timeLeft_${examId}_${setNo}`;
+        const savedTime = localStorage.getItem(timerKey);
         timeLeft = (savedTime && parseInt(savedTime) > 0) ? parseInt(savedTime) : (exam.duration * 60);
+        localStorage.setItem("activeTimerKey", timerKey);
         document.getElementById("examTitle").textContent = exam.exam_name || exam.name || "Exam";
         document.title = exam.exam_name || exam.name || "Exam";
       }
@@ -234,7 +237,8 @@ function startTimer() {
     let min = Math.floor(timeLeft / 60);
     let sec = timeLeft % 60;
     timerEl.textContent = `${min}:${sec.toString().padStart(2, "0")}`;
-    localStorage.setItem("timeLeft", timeLeft);
+    const tk = localStorage.getItem("activeTimerKey");
+    if (tk) localStorage.setItem(tk, timeLeft);
     timeLeft--;
   }, 1000);
 }
@@ -304,11 +308,11 @@ function renderNextButton(hasNext) {
 
   const form = document.getElementById("quizForm");
   const nextNum = (currentPage + 1) * questionsPerPage + 1;
-  form.innerHTML += `
+  form.insertAdjacentHTML("beforeend", `
     <div id="nextPreviewText" class="next-preview">Question ${nextNum}</div>
     <div class="text-center mt-2 mb-3" id="nextPageBtn">
       <button type="button" class="next-btn" onclick="nextPage()">Next <span style="font-size:18px">&darr;</span></button>
-    </div>`;
+    </div>`);
 }
 
 function nextPage() {
@@ -329,6 +333,9 @@ function updateNavStatus() {
   const checked = document.querySelectorAll("input[type=radio]:checked");
   const map = {};
   checked.forEach(input => { map[input.name] = true; });
+  // Also include saved answers from localStorage (for questions on other pages)
+  const saved = JSON.parse(localStorage.getItem("savedAnswers") || "{}");
+  Object.keys(saved).forEach(name => { map[name] = true; });
   let count = 0;
   Object.keys(map).forEach(name => {
     const qid = name.substring(1);
@@ -393,6 +400,9 @@ function sendAnswers(isTimeout) {
     localStorage.setItem("attemptId", result.attempt_id);
     localStorage.setItem("timeout", isTimeout);
     localStorage.removeItem("exam_active");
+    const timerKey = localStorage.getItem("activeTimerKey");
+    if (timerKey) localStorage.removeItem(timerKey);
+    localStorage.removeItem("activeTimerKey");
     localStorage.removeItem("timeLeft");
     localStorage.removeItem("examStartTime");
     localStorage.removeItem("savedAnswers");
@@ -422,7 +432,8 @@ function sendAnswers(isTimeout) {
 
 function saveCurrentProgress() {
   if (!examStarted) return;
-  localStorage.setItem("timeLeft", timeLeft);
+  const timerKey = localStorage.getItem("activeTimerKey");
+  if (timerKey) localStorage.setItem(timerKey, timeLeft);
   const answers = {};
   document.querySelectorAll("input[type=radio]:checked").forEach(input => {
     answers[input.name] = input.value;
