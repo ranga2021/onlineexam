@@ -52,13 +52,37 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 10000
 });
 
-// Test the pool connection on startup
+// Test the pool connection on startup and run migrations
 pool.getConnection((err, connection) => {
   if (err) {
     console.error("DB CONNECTION FAILED:", err.message);
   } else {
     console.log("MySQL Pool Connected successfully");
-    connection.release(); // Return the connection to the pool
+
+    // Alter questions table columns to TEXT to support long descriptions
+    const alterStatements = [
+      "ALTER TABLE questions MODIFY COLUMN question TEXT",
+      "ALTER TABLE questions MODIFY COLUMN option_a TEXT",
+      "ALTER TABLE questions MODIFY COLUMN option_b TEXT",
+      "ALTER TABLE questions MODIFY COLUMN option_c TEXT",
+      "ALTER TABLE questions MODIFY COLUMN option_d TEXT",
+      "ALTER TABLE questions MODIFY COLUMN explanation TEXT",
+      "ALTER TABLE questions MODIFY COLUMN explanation_1 TEXT",
+      "ALTER TABLE questions MODIFY COLUMN explanation_2 TEXT",
+      "ALTER TABLE questions MODIFY COLUMN explanation_3 TEXT"
+    ];
+
+    let completed = 0;
+    alterStatements.forEach(sql => {
+      connection.query(sql, (alterErr) => {
+        if (alterErr) console.error("Migration warning:", alterErr.message);
+        completed++;
+        if (completed === alterStatements.length) {
+          console.log("DB migrations checked successfully");
+          connection.release();
+        }
+      });
+    });
   }
 });
 
